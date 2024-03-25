@@ -30,10 +30,9 @@ public final class Defs {
         }
     }
 
-    // JSON Settings
-    public static final class SettingsKeys {
-        public static final String ENABLE_DARK_MODE = "enableDarkMode";
-        public static final String ENABLE_DISCORD_RICH_PRESENCE = "enableDiscordRichPresence";
+    public static final class ProgramArguments {
+        public static final String SERVER = "-server";
+        public static final String DB_EDITOR = "-dbeditor";
     }
 
     // Resources Location

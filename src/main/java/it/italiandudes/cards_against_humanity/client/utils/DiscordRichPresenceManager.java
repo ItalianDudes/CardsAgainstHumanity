@@ -1,9 +1,9 @@
-package it.italiandudes.cards_against_humanity.utils;
+package it.italiandudes.cards_against_humanity.client.utils;
 
 import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
-import it.italiandudes.cards_against_humanity.client.utils.ClientSettings;
+import it.italiandudes.cards_against_humanity.utils.Defs;
 import org.jetbrains.annotations.Nullable;
 
 public final class DiscordRichPresenceManager {
@@ -12,6 +12,7 @@ public final class DiscordRichPresenceManager {
     public static final class States {
         public static final String MENU = "Nel Menu";
         public static final String SETTINGS = "Modificando le Impostazioni";
+        public static final String IN_LOBBY = "In Lobby";
         public static final String IN_GAME = "In Gioco";
     }
 
@@ -23,7 +24,7 @@ public final class DiscordRichPresenceManager {
     // Rich Presence Initializer
     private static void initializeRichPresence() {
         try {
-            if (!ClientSettings.getSettings().getBoolean(Defs.SettingsKeys.ENABLE_DISCORD_RICH_PRESENCE)) return;
+            if (!ClientSettings.getSettings().getBoolean(ClientSettings.SettingsKeys.ENABLE_DISCORD_RICH_PRESENCE)) return;
         } catch (Throwable e) {
             return;
         }
@@ -46,7 +47,7 @@ public final class DiscordRichPresenceManager {
     }
     public static void updateRichPresenceState(@Nullable final String state) {
         try {
-            if (!ClientSettings.getSettings().getBoolean(Defs.SettingsKeys.ENABLE_DISCORD_RICH_PRESENCE)) return;
+            if (!ClientSettings.getSettings().getBoolean(ClientSettings.SettingsKeys.ENABLE_DISCORD_RICH_PRESENCE)) return;
         } catch (Throwable e) {
             return;
         }

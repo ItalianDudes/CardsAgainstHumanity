@@ -6,20 +6,22 @@ import org.json.JSONObject;
 public final class WhiteCard {
 
     // Attributes
+    private final int id;
     @NotNull private final String content;
     private final boolean isBlank;
 
     // Constructors
-    public WhiteCard(@NotNull final String content, final boolean isBlank) {
+    public WhiteCard(final int id, @NotNull final String content, final boolean isBlank) {
         super();
+        this.id = id;
         this.content = content;
         this.isBlank = isBlank;
     }
-    public WhiteCard(@NotNull final String content) {
-        this(content, false);
-    }
 
     // Methods
+    public int getId() {
+        return id;
+    }
     @NotNull
     public String getContent() {
         return content;
@@ -34,12 +36,14 @@ public final class WhiteCard {
 
         WhiteCard whiteCard = (WhiteCard) o;
 
+        if (getId() != whiteCard.getId()) return false;
         if (isBlank() != whiteCard.isBlank()) return false;
         return getContent().equals(whiteCard.getContent());
     }
     @Override
     public int hashCode() {
-        int result = getContent().hashCode();
+        int result = getId();
+        result = 31 * result + getContent().hashCode();
         result = 31 * result + (isBlank() ? 1 : 0);
         return result;
     }
@@ -50,7 +54,9 @@ public final class WhiteCard {
     @NotNull
     public JSONObject toJSON() {
         JSONObject object = new JSONObject();
+        object.put("id", id);
         object.put("content", content);
+        object.put("is_blank", isBlank);
         return object;
     }
 }

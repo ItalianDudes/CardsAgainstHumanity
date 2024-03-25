@@ -2,9 +2,9 @@ package it.italiandudes.cards_against_humanity.client.javafx;
 
 import it.italiandudes.cards_against_humanity.client.javafx.scenes.SceneMainMenu;
 import it.italiandudes.cards_against_humanity.client.javafx.utils.JFXDefs;
+import it.italiandudes.cards_against_humanity.client.javafx.utils.ThemeHandler;
+import it.italiandudes.cards_against_humanity.client.utils.ClientSettings;
 import it.italiandudes.idl.common.Logger;
-import it.italiandudes.map_visualizer.master.utils.Settings;
-import it.italiandudes.map_visualizer.master.javafx.utils.ThemeHandler;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
@@ -57,7 +57,7 @@ public final class Client extends Application {
 
     // Start Methods
     public static void start(String[] args) {
-        Settings.loadSettingsFile();
+        ClientSettings.loadSettingsFile();
         ThemeHandler.setConfigTheme();
         launch(args);
     }

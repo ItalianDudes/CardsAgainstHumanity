@@ -1,6 +1,11 @@
 {
+  "db_path": "database.cah",
+  "server_port": 45800,
+  "password": null,
   "always_randomize_master": false,
-  "always_randomize_cards": false,
+  "always_randomize_white_cards": false,
+  "always_randomize_black_cards": false,
   "infinite_mode": false,
-  "game_win_target": 5
+  "game_win_target": 5,
+  "white_cards": 7
 }

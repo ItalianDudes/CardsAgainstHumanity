@@ -38,10 +38,16 @@ public final class ClientSettings {
     // Settings Checker
     private static void fixJSONSettings() throws JSONException, IOException {
         try {
-            SETTINGS.getBoolean(Defs.SettingsKeys.ENABLE_DARK_MODE);
+            SETTINGS.getBoolean(SettingsKeys.ENABLE_DARK_MODE);
         } catch (JSONException e) {
-            SETTINGS.remove(Defs.SettingsKeys.ENABLE_DARK_MODE);
-            SETTINGS.put(Defs.SettingsKeys.ENABLE_DARK_MODE, true);
+            SETTINGS.remove(SettingsKeys.ENABLE_DARK_MODE);
+            SETTINGS.put(SettingsKeys.ENABLE_DARK_MODE, true);
+        }
+        try {
+            SETTINGS.getBoolean(SettingsKeys.ENABLE_DISCORD_RICH_PRESENCE);
+        } catch (JSONException e) {
+            SETTINGS.remove(SettingsKeys.ENABLE_DISCORD_RICH_PRESENCE);
+            SETTINGS.put(SettingsKeys.ENABLE_DISCORD_RICH_PRESENCE, true);
         }
         writeJSONSettings();
     }
@@ -55,5 +61,11 @@ public final class ClientSettings {
     @NotNull
     public static JSONObject getSettings() {
         return SETTINGS;
+    }
+
+    // JSON Settings
+    public static final class SettingsKeys {
+        public static final String ENABLE_DARK_MODE = "enableDarkMode";
+        public static final String ENABLE_DISCORD_RICH_PRESENCE = "enableDiscordRichPresence";
     }
 }

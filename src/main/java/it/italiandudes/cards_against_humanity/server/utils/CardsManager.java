@@ -10,7 +10,8 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Random;
 
 public final class CardsManager {
 
@@ -18,7 +19,8 @@ public final class CardsManager {
     private static final Random RANDOMIZER = new Random();
 
     // Attributes
-    @NotNull private final ArrayList<@NotNull WhiteCard> WHITE_CARDS = new ArrayList<>();
+    @NotNull private final ArrayList<@NotNull WhiteCard> AVAILABLE_WHITE_CARDS = new ArrayList<>();
+    @NotNull private final ArrayList<@NotNull WhiteCard> NOT_AVAILABLE_WHITE_CARDS = new ArrayList<>();
     @NotNull private final ArrayList<@NotNull BlackCard> AVAILABLE_BLACK_CARDS = new ArrayList<>();
     @NotNull private final ArrayList<@NotNull BlackCard> NOT_AVAILABLE_BLACK_CARDS = new ArrayList<>();
 
@@ -30,7 +32,7 @@ public final class CardsManager {
             if (ps == null) throw new SQLException("Prepared statement is null");
             ResultSet result = ps.executeQuery();
             while (result.next()) {
-                WHITE_CARDS.add(new WhiteCard(result.getString("content"), result.getInt("is_blank") != 0));
+                AVAILABLE_WHITE_CARDS.add(new WhiteCard(result.getInt("id"), result.getString("content"), result.getInt("is_blank") != 0));
             }
             ps.close();
             query = "SELECT * FROM black_cards;";
@@ -38,7 +40,7 @@ public final class CardsManager {
             if (ps == null) throw new SQLException("Prepared statement is null");
             result = ps.executeQuery();
             while (result.next()) {
-                AVAILABLE_BLACK_CARDS.add(new BlackCard(result.getString("content"), result.getInt("empty_fields")));
+                AVAILABLE_BLACK_CARDS.add(new BlackCard(result.getInt("id"), result.getString("content"), result.getInt("empty_fields")));
             }
             ps.close();
         } catch (SQLException e) {
@@ -51,32 +53,44 @@ public final class CardsManager {
     // Methods
     @Nullable
     public ArrayList<WhiteCard> getRandomWhiteCards(final int amount) {
-        if (amount <= 0 || amount > WHITE_CARDS.size()) return null;
-        if (amount == WHITE_CARDS.size()) {
-            ArrayList<WhiteCard> clone = new ArrayList<>();
-            Collections.copy(clone, new ArrayList<>(WHITE_CARDS));
-            return clone;
-        }
+        if (amount <= 0) return null;
+        if (AVAILABLE_WHITE_CARDS.isEmpty()) restoreAvailableWhiteCards();
         ArrayList<Integer> cardsPool = new ArrayList<>();
         ArrayList<WhiteCard> cards = new ArrayList<>();
         for (int i=0; i<amount; i++) {
             int number;
             //noinspection StatementWithEmptyBody
-            while (cardsPool.contains(number = randomBetween(WHITE_CARDS.size())));
-            cards.add(WHITE_CARDS.get(number));
+            while (cardsPool.contains(number = randomBetween(AVAILABLE_WHITE_CARDS.size())));
+            WhiteCard whiteCard = AVAILABLE_WHITE_CARDS.get(number);
+            cards.add(whiteCard);
+            if (ServerSettings.getSettings().getBoolean(ServerSettings.SettingsKeys.ALWAYS_RANDOMIZE_WHITE_CARDS) || ServerSettings.getSettings().getBoolean(ServerSettings.SettingsKeys.INFINITE_MODE)) {
+                AVAILABLE_WHITE_CARDS.remove(whiteCard);
+                NOT_AVAILABLE_WHITE_CARDS.add(whiteCard);
+            }
             cardsPool.add(number);
         }
         return cards;
     }
     @NotNull
     public BlackCard getRandomBlackCard() {
+        if (AVAILABLE_BLACK_CARDS.isEmpty()) restoreAvailableBlackCards();
         int cardNumber = randomBetween(AVAILABLE_BLACK_CARDS.size());
         BlackCard card = AVAILABLE_BLACK_CARDS.get(cardNumber);
-        NOT_AVAILABLE_BLACK_CARDS.add(card);
-        AVAILABLE_BLACK_CARDS.remove(cardNumber);
+        if (ServerSettings.getSettings().getBoolean(ServerSettings.SettingsKeys.ALWAYS_RANDOMIZE_BLACK_CARDS) || ServerSettings.getSettings().getBoolean(ServerSettings.SettingsKeys.INFINITE_MODE)) {
+            NOT_AVAILABLE_BLACK_CARDS.add(card);
+            AVAILABLE_BLACK_CARDS.remove(cardNumber);
+        }
         return card;
     }
-    public void restoreAvailableBlackCards() {
+    private void restoreAvailableCards() {
+        restoreAvailableWhiteCards();
+        restoreAvailableBlackCards();
+    }
+    private void restoreAvailableWhiteCards() {
+        AVAILABLE_WHITE_CARDS.addAll(NOT_AVAILABLE_WHITE_CARDS);
+        NOT_AVAILABLE_WHITE_CARDS.clear();
+    }
+    private void restoreAvailableBlackCards() {
         AVAILABLE_BLACK_CARDS.addAll(NOT_AVAILABLE_BLACK_CARDS);
         NOT_AVAILABLE_BLACK_CARDS.clear();
     }
@@ -87,7 +101,8 @@ public final class CardsManager {
     // Instance
     private static CardsManager INSTANCE = null;
     public static void reloadInstance() {
-        INSTANCE = new CardsManager();
+        if (INSTANCE == null) INSTANCE = new CardsManager();
+        else getInstance().restoreAvailableCards();
     }
     @NotNull
     public static CardsManager getInstance() {

@@ -6,16 +6,21 @@ import org.json.JSONObject;
 public final class BlackCard {
 
     // Attributes
+    private final int id;
     @NotNull private final String content;
     private final int emptyFields;
 
     // Constructors
-    public BlackCard(@NotNull final String content, final int emptyFields) {
+    public BlackCard(final int id, @NotNull final String content, final int emptyFields) {
+        this.id = id;
         this.content = content;
         this.emptyFields = emptyFields;
     }
 
     // Methods
+    public int getId() {
+        return id;
+    }
     @NotNull
     public String getContent() {
         return content;
@@ -28,14 +33,16 @@ public final class BlackCard {
         if (this == o) return true;
         if (!(o instanceof BlackCard)) return false;
 
-        BlackCard card = (BlackCard) o;
+        BlackCard blackCard = (BlackCard) o;
 
-        if (getEmptyFields() != card.getEmptyFields()) return false;
-        return getContent().equals(card.getContent());
+        if (getId() != blackCard.getId()) return false;
+        if (getEmptyFields() != blackCard.getEmptyFields()) return false;
+        return getContent().equals(blackCard.getContent());
     }
     @Override
     public int hashCode() {
-        int result = getContent().hashCode();
+        int result = getId();
+        result = 31 * result + getContent().hashCode();
         result = 31 * result + getEmptyFields();
         return result;
     }
@@ -46,6 +53,7 @@ public final class BlackCard {
     @NotNull
     public JSONObject toJSON() {
         JSONObject object = new JSONObject();
+        object.put("id", id);
         object.put("content", content);
         object.put("empty_fields", emptyFields);
         return object;

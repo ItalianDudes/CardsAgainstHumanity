@@ -6,8 +6,8 @@ import it.italiandudes.cards_against_humanity.client.javafx.alerts.InformationAl
 import it.italiandudes.cards_against_humanity.client.javafx.scenes.SceneMainMenu;
 import it.italiandudes.cards_against_humanity.client.javafx.utils.ThemeHandler;
 import it.italiandudes.cards_against_humanity.client.utils.ClientSettings;
+import it.italiandudes.cards_against_humanity.client.utils.DiscordRichPresenceManager;
 import it.italiandudes.cards_against_humanity.utils.Defs;
-import it.italiandudes.cards_against_humanity.utils.DiscordRichPresenceManager;
 import it.italiandudes.idl.common.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
@@ -37,8 +37,9 @@ public final class ControllerSceneSettingsEditor {
     // Initialize
     @FXML
     private void initialize() {
-        toggleButtonEnableDarkMode.setSelected(ClientSettings.getSettings().getBoolean(Defs.SettingsKeys.ENABLE_DARK_MODE));
-        toggleButtonEnableDiscordRichPresence.setSelected(ClientSettings.getSettings().getBoolean(Defs.SettingsKeys.ENABLE_DISCORD_RICH_PRESENCE));
+        DiscordRichPresenceManager.updateRichPresenceState(DiscordRichPresenceManager.States.SETTINGS);
+        toggleButtonEnableDarkMode.setSelected(ClientSettings.getSettings().getBoolean(ClientSettings.SettingsKeys.ENABLE_DARK_MODE));
+        toggleButtonEnableDiscordRichPresence.setSelected(ClientSettings.getSettings().getBoolean(ClientSettings.SettingsKeys.ENABLE_DISCORD_RICH_PRESENCE));
         if (toggleButtonEnableDarkMode.isSelected()) imageViewEnableDarkMode.setImage(DARK_MODE);
         else imageViewEnableDarkMode.setImage(LIGHT_MODE);
         if (toggleButtonEnableDiscordRichPresence.isSelected()) imageViewEnableDiscordRichPresence.setImage(WUMPUS);
@@ -74,8 +75,8 @@ public final class ControllerSceneSettingsEditor {
                     @Override
                     protected Void call() {
                         try {
-                            ClientSettings.getSettings().put(Defs.SettingsKeys.ENABLE_DARK_MODE, toggleButtonEnableDarkMode.isSelected());
-                            ClientSettings.getSettings().put(Defs.SettingsKeys.ENABLE_DISCORD_RICH_PRESENCE, toggleButtonEnableDiscordRichPresence.isSelected());
+                            ClientSettings.getSettings().put(ClientSettings.SettingsKeys.ENABLE_DARK_MODE, toggleButtonEnableDarkMode.isSelected());
+                            ClientSettings.getSettings().put(ClientSettings.SettingsKeys.ENABLE_DISCORD_RICH_PRESENCE, toggleButtonEnableDiscordRichPresence.isSelected());
                         } catch (JSONException e) {
                             Logger.log(e);
                         }

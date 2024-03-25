@@ -1,10 +1,10 @@
 package it.italiandudes.cards_against_humanity.client.javafx.scenes;
 
 import it.italiandudes.cards_against_humanity.client.javafx.components.SceneController;
+import it.italiandudes.cards_against_humanity.client.javafx.controllers.ControllerSceneSettingsEditor;
 import it.italiandudes.cards_against_humanity.client.javafx.utils.JFXDefs;
+import it.italiandudes.cards_against_humanity.client.javafx.utils.ThemeHandler;
 import it.italiandudes.cards_against_humanity.utils.Defs;
-import it.italiandudes.map_visualizer.master.javafx.controllers.ControllerSceneSettingsEditor;
-import it.italiandudes.map_visualizer.master.javafx.utils.ThemeHandler;
 import it.italiandudes.idl.common.Logger;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
