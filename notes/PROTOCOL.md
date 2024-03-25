@@ -1,0 +1,52 @@
+# Cards Against Humanity Protocol Description
+
+- Data Structure:
+  - Length [int / 4 bytes]
+  - JSON [String]
+
+- [CLIENT] Connection:
+  - Username
+  - Server Password
+- [SERVER] Response to client connection:
+  - Username taken
+  - Wrong password
+  - Connection error
+  - Running game
+
+- [CLIENT] Lobby:
+  - If player is ready -> Send READY
+  - If player is not ready -> Send NOT READY
+  - If player quit -> Send DISCONNECT
+- [SERVER] Lobby:
+  - If receives ready or not ready -> Broadcast players ready status
+  - If somebody disconnect or crashes -> Broadcast players the new list (with players ready status)
+  - If everybody is ready -> Broadcast GAME START
+
+- [CLIENT] Game as Master:
+  - Get elected as master.
+  - Show the card master.
+  - Receive the black card from the server and the missing cards to reach NUM_WHITE_CARDS available to the player. (you can't play white cards)
+  - Wait player's cards from the server.
+  - Choose the round winner.
+  - Display the round winner.
+  - If nobody has still reached the game win then wait for the master election (you won't be a master), else show the game winner and go to the lobby.
+- [CLIENT] Game as Player:
+  - Get elected as player.
+  - Show the card master.
+  - Receive the black card from the server and the missing cards to reach NUM_WHITE_CARDS available to the player.
+  - Send the chosen cards.
+  - Wait for server update.
+  - Show the round winner.
+  - If the server says GAME WINNER then display the game winner and go to the lobby.
+  - Else wait for election.
+- [SERVER] Game:
+  - Elect the master randomly or based on previous round winner based on server settings.
+  - Broadcast the card master.
+  - Broadcast black card and send to each player some random cards to make them reach NUM_WHITE_CARDS.
+  - Wait for every player sending their card choices.
+  - When everybody has submitted their choices send to the master the choices.
+  - Wait for the master choice.
+  - Broadcast the round winner.
+  - If the server is set on "infinite mode" then shuffle the cards on every round and elect the round winner as new master.
+  - Else If someone has won the right amount of games then broadcast the game winner and everybody returns to lobby.
+  - Else broadcast the round winner and elect it as new master. 
