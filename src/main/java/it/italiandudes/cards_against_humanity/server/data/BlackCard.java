@@ -1,6 +1,7 @@
 package it.italiandudes.cards_against_humanity.server.data;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public final class BlackCard {
@@ -15,6 +16,11 @@ public final class BlackCard {
         this.id = id;
         this.content = content;
         this.emptyFields = emptyFields;
+    }
+    public BlackCard(@NotNull final JSONObject json) throws JSONException {
+        this.id = json.getInt("id");
+        this.content = json.getString("content");
+        this.emptyFields = json.getInt("empty_fields");
     }
 
     // Methods

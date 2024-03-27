@@ -1,7 +1,10 @@
-package it.italiandudes.cards_against_humanity.server.utils;
+package it.italiandudes.cards_against_humanity.server.game;
 
 import it.italiandudes.cards_against_humanity.server.data.BlackCard;
 import it.italiandudes.cards_against_humanity.server.data.WhiteCard;
+import it.italiandudes.cards_against_humanity.server.utils.DBManager;
+import it.italiandudes.cards_against_humanity.server.utils.ServerSettings;
+import it.italiandudes.cards_against_humanity.utils.Randomizer;
 import it.italiandudes.idl.common.InfoFlags;
 import it.italiandudes.idl.common.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -11,12 +14,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Random;
 
 public final class CardsManager {
-
-    // Static
-    private static final Random RANDOMIZER = new Random();
 
     // Attributes
     @NotNull private final ArrayList<@NotNull WhiteCard> AVAILABLE_WHITE_CARDS = new ArrayList<>();
@@ -60,7 +59,7 @@ public final class CardsManager {
         for (int i=0; i<amount; i++) {
             int number;
             //noinspection StatementWithEmptyBody
-            while (cardsPool.contains(number = randomBetween(AVAILABLE_WHITE_CARDS.size())));
+            while (cardsPool.contains(number = Randomizer.randomFromZeroTo(AVAILABLE_WHITE_CARDS.size())));
             WhiteCard whiteCard = AVAILABLE_WHITE_CARDS.get(number);
             cards.add(whiteCard);
             if (ServerSettings.getSettings().getBoolean(ServerSettings.SettingsKeys.ALWAYS_RANDOMIZE_WHITE_CARDS) || ServerSettings.getSettings().getBoolean(ServerSettings.SettingsKeys.INFINITE_MODE)) {
@@ -74,7 +73,7 @@ public final class CardsManager {
     @NotNull
     public BlackCard getRandomBlackCard() {
         if (AVAILABLE_BLACK_CARDS.isEmpty()) restoreAvailableBlackCards();
-        int cardNumber = randomBetween(AVAILABLE_BLACK_CARDS.size());
+        int cardNumber = Randomizer.randomFromZeroTo(AVAILABLE_BLACK_CARDS.size());
         BlackCard card = AVAILABLE_BLACK_CARDS.get(cardNumber);
         if (ServerSettings.getSettings().getBoolean(ServerSettings.SettingsKeys.ALWAYS_RANDOMIZE_BLACK_CARDS) || ServerSettings.getSettings().getBoolean(ServerSettings.SettingsKeys.INFINITE_MODE)) {
             NOT_AVAILABLE_BLACK_CARDS.add(card);
@@ -93,9 +92,6 @@ public final class CardsManager {
     private void restoreAvailableBlackCards() {
         AVAILABLE_BLACK_CARDS.addAll(NOT_AVAILABLE_BLACK_CARDS);
         NOT_AVAILABLE_BLACK_CARDS.clear();
-    }
-    private int randomBetween(final int max) { // 0 Included to Max excluded
-        return RANDOMIZER.nextInt(max);
     }
 
     // Instance

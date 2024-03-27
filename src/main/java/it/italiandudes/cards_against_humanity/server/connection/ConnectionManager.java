@@ -2,6 +2,7 @@ package it.italiandudes.cards_against_humanity.server.connection;
 
 import it.italiandudes.cards_against_humanity.server.data.UserConnection;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.Socket;
 import java.util.ArrayList;
@@ -40,6 +41,13 @@ public final class ConnectionManager {
         OPEN_CONNECTION.remove(connection.getConnection());
         new ClientListener(connection).start();
         return ESTABLISHED_CONNECTIONS.add(connection);
+    }
+    @Nullable
+    public UserConnection getEstablishedConnectionByUsername(@NotNull final String username) {
+        for (UserConnection connection : ESTABLISHED_CONNECTIONS) {
+            if (connection.getUsername().equals(username)) return connection;
+        }
+        return null;
     }
     @NotNull
     public ArrayList<@NotNull UserConnection> getEstablishedConnections() {

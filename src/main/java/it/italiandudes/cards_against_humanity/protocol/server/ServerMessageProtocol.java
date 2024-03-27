@@ -5,5 +5,7 @@ public enum ServerMessageProtocol {
     WRONG_PASSWORD,
     CONNECTION_ERROR,
     RUNNING_GAME,
-    DISCONNECT
+    DISCONNECT,
+    CARDS_UPDATE,
+    SEND_USER_CHOICES_TO_MASTER
 }

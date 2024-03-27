@@ -15,6 +15,10 @@ public final class UserConnection {
         this.username = username;
         this.connection = connection;
     }
+    public UserConnection(@NotNull final UserConnection userConnection) {
+        this.username = userConnection.username;
+        this.connection = userConnection.connection;
+    }
 
     // Methods
     @NotNull
