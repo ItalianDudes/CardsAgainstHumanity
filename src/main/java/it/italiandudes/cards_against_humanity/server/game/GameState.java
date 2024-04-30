@@ -5,5 +5,6 @@ public enum GameState {
     LOBBY,
     WAIT_FOR_NEXT_ROUND,
     ERROR,
-    CHEAT_DETECTED
+    CHEAT_DETECTED,
+    WAITING_FOR_MASTER
 }

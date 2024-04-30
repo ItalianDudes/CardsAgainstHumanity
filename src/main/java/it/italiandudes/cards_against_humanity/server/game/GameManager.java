@@ -1,7 +1,11 @@
 package it.italiandudes.cards_against_humanity.server.game;
 
+import it.italiandudes.cards_against_humanity.exceptions.ProtocolException;
 import it.italiandudes.cards_against_humanity.protocol.MessageExchanger;
+import it.italiandudes.cards_against_humanity.protocol.client.MessageClientWinningChoice;
 import it.italiandudes.cards_against_humanity.protocol.server.MessageServerCardsUpdate;
+import it.italiandudes.cards_against_humanity.protocol.server.MessageServerSendUserChoicesToMaster;
+import it.italiandudes.cards_against_humanity.protocol.server.MessageServerWinningChoice;
 import it.italiandudes.cards_against_humanity.server.Server;
 import it.italiandudes.cards_against_humanity.server.connection.ConnectionManager;
 import it.italiandudes.cards_against_humanity.server.data.BlackCard;
@@ -14,9 +18,11 @@ import it.italiandudes.cards_against_humanity.utils.Randomizer;
 import it.italiandudes.idl.common.InfoFlags;
 import it.italiandudes.idl.common.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
@@ -50,6 +56,7 @@ public final class GameManager {
             } catch (GameNotRunningException | MasterAlreadyElectedException e) {
                 Logger.log("This should not happen", new InfoFlags(true, true));
                 Server.showErrorAndShutdownServer(e);
+                return;
             }
 
             try {
@@ -62,6 +69,7 @@ public final class GameManager {
             } catch (GameNotRunningException e) {
                 Logger.log("This should not happen", new InfoFlags(true ,true));
                 Server.showErrorAndShutdownServer(e);
+                return;
             }
 
             //noinspection StatementWithEmptyBody
@@ -72,7 +80,52 @@ public final class GameManager {
                 return;
             }
 
-            sendUserChoicesToMaster(); // TODO: to implement this and the end of the game
+            try {
+                sendUserChoicesToMaster();
+            } catch (GameNotRunningException e) {
+                Logger.log("This should not happen", new InfoFlags(true, true));
+                Server.showErrorAndShutdownServer(e);
+                return;
+            } catch (IOException e) {
+                Logger.log("An error has occurred during the transmission of the choices to the master", new InfoFlags(true, false));
+                Logger.log(e);
+                abortGame();
+                return;
+            }
+
+            @NotNull ArrayList<@NotNull WhiteCard> winningChoice;
+            try {
+                winningChoice = receiveWinningChoice();
+            } catch (GameNotRunningException e) {
+                Logger.log("This should not happen", new InfoFlags(true, true));
+                Server.showErrorAndShutdownServer(e);
+                return;
+            } catch (ProtocolException | IOException e) {
+                Logger.log("An error has occurred during winning choice receive", new InfoFlags(true, false));
+                Logger.log(e);
+                abortGame();
+                return;
+            }
+
+            try {
+                broadcastWinningChoice(winningChoice);
+            } catch (GameNotRunningException e) {
+                Logger.log("This should not happen", new InfoFlags(true, true));
+                Server.showErrorAndShutdownServer(e);
+                return;
+            } catch (WinnerNotFoundException e) {
+                Logger.log("The round winner was not found, probably the player has disconnected", new InfoFlags(true, false));
+                Logger.log(e);
+                abortGame();
+                return;
+            } catch (IOException e) {
+                Logger.log("An error has occurred during winning choice receive", new InfoFlags(true, false));
+                Logger.log(e);
+                abortGame();
+                return;
+            }
+
+            // TODO: finish to implement end game with infinite mode ecc.
 
         }).start();
     }
@@ -104,8 +157,32 @@ public final class GameManager {
     }
 
     // Private Methods
-    private void sendUserChoicesToMaster() throws GameNotRunningException {
+    private void broadcastWinningChoice(@NotNull final ArrayList<@NotNull WhiteCard> winningChoice) throws GameNotRunningException, WinnerNotFoundException, IOException {
         if (GAME_STATE != GameState.RUNNING) throw new GameNotRunningException("The game needs to be started");
+        UserConnection winner = null;
+        for (String username : USER_CHOICES.keySet()) {
+            if (USER_CHOICES.get(username).equals(winningChoice)) {
+                winner = ConnectionManager.getInstance().getEstablishedConnectionByUsername(username);
+                break;
+            }
+        }
+        if (winner == null) throw new WinnerNotFoundException("The winner wasn't found in the connected users");
+        MessageServerWinningChoice winningChoiceMessage = new MessageServerWinningChoice(winner.getUsername(), winningChoice);
+        for (UserConnection connection : ConnectionManager.getInstance().getEstablishedConnections()) {
+            MessageExchanger.sendServerMessage(connection, winningChoiceMessage);
+        }
+    }
+    @NotNull
+    private ArrayList<@NotNull WhiteCard> receiveWinningChoice() throws GameNotRunningException, IOException, ProtocolException {
+        if (GAME_STATE != GameState.RUNNING) throw new GameNotRunningException("The game needs to be started");
+        JSONObject winningChoiceJSON = MessageExchanger.receiveClientMessage(master);
+        MessageClientWinningChoice winningChoiceMessage = new MessageClientWinningChoice(winningChoiceJSON);
+        return winningChoiceMessage.getWinningChoice();
+    }
+    private void sendUserChoicesToMaster() throws GameNotRunningException, IOException {
+        if (GAME_STATE != GameState.RUNNING) throw new GameNotRunningException("The game needs to be started");
+        MessageExchanger.sendServerMessage(master, new MessageServerSendUserChoicesToMaster(USER_CHOICES));
+        GAME_STATE = GameState.WAITING_FOR_MASTER;
     }
     private void abortGame() {
         resetPreviousWinner();

@@ -28,6 +28,7 @@
   - Receive the black card from the server and the missing cards to reach NUM_WHITE_CARDS available to the player. (you can't play white cards)
   - Wait player's cards from the server.
   - Choose the round winner.
+  - Receive the round winner name with the choices.
   - Display the round winner.
   - If nobody has still reached the game win then wait for the master election (you won't be a master), else show the game winner and go to the lobby.
 - [CLIENT] Game as Player:

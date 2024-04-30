@@ -65,6 +65,7 @@ public final class MessageServerCardsUpdate extends ServerMessage {
     @Override @NotNull
     public String toString() {
         JSONObject object = new JSONObject();
+        object.put("protocol", ServerMessageProtocol.CARDS_UPDATE.name());
         object.put("black_card", blackCard.toJSON());
         JSONArray whiteCardsArray = new JSONArray();
         for (WhiteCard whiteCard : newWhiteCards) {

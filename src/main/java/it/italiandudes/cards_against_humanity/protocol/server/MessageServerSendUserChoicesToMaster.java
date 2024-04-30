@@ -62,6 +62,7 @@ public class MessageServerSendUserChoicesToMaster extends ServerMessage {
     @Override @NotNull
     public String toString() {
         JSONObject object = new JSONObject();
+        object.put("protocol", ServerMessageProtocol.SEND_USER_CHOICES_TO_MASTER);
         JSONArray usersChoices = new JSONArray();
         for (@NotNull ArrayList<WhiteCard> userChoicesList : this.usersChoices) {
             JSONArray userChoicesArray = new JSONArray();
